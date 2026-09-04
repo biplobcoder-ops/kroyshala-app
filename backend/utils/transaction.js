@@ -1,22 +1,27 @@
+
 const mongoose = require("mongoose");
 
 // ==========================================
 // MongoDB Transaction Helper
 // ==========================================
+
 const withTransaction = async (callback) => {
   const session = await mongoose.startSession();
-  session.startTransaction();
 
   try {
-    const result = await callback(session);
-    await session.commitTransaction();
+    let result;
+
+    await session.withTransaction(async () => {
+      result = await callback(session);
+    });
+
     return result;
   } catch (error) {
-    await session.abortTransaction();
     throw error;
   } finally {
-    session.endSession();
+    await session.endSession();
   }
 };
 
 module.exports = withTransaction;
+
