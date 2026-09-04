@@ -18,13 +18,11 @@ const wishlistRouter = require("./routes/wishlist.route");
 const dashboardRouter = require("./routes/dashboard.route");
 const searchRouter = require("./routes/search.route");
 
-// 🔥 CORS - Dynamic Origin Configuration (সব জায়গায় কাজ করবে)
+// 🔥 CORS - শুধুমাত্র নির্দিষ্ট অরিজিন অ্যালাউড (অন্য সব ব্লক)
 const allowedOrigins = [
-  "http://localhost:5173",                       // লোকাল ডেভেলপমেন্ট
-  "https://kroyshala-app.vercel.app",            // প্রোডাকশন URL
-  process.env.CLIENT_URL,                        // যদি CLIENT_URL সেট করা থাকে
-  process.env.FRONTEND_URL,                      // যদি FRONTEND_URL সেট করা থাকে
-].filter(Boolean);                               // undefined বা খালি বাদ দেয়
+  "http://localhost:5173",                       // লোকাল ডেভেলপমেন্ট (তোমার ফ্রন্টএন্ড)
+  "https://kroyshala-app.vercel.app",            // প্রোডাকশন URL (তোমার Vercel অ্যাপ)
+].filter(Boolean);
 
 app.use(
   cors({
