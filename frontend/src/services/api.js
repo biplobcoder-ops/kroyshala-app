@@ -1,7 +1,17 @@
 import axios from "axios";
 
+// লোকাল ডেভেলপমেন্ট আর প্রোডাকশন URL আলাদা করার জন্য
+const getBaseURL = () => {
+  // Vercel-এ ডেপ্লয় করলে এনভায়রনমেন্ট ভেরিয়েবল থেকে URL নিয়ে নাও
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // লোকাল ডেভেলপমেন্টের জন্য (যখন .env-এ কিছু নেই)
+  return "http://localhost:5000/api";
+};
+
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: getBaseURL(),
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
@@ -41,7 +51,7 @@ api.interceptors.response.use(
       originalRequest.url?.includes("/user/verify-email") ||
       originalRequest.url?.includes("/user/forgot-password") ||
       originalRequest.url?.includes("/user/reset-password") ||
-      originalRequest.url?.includes("/user/me"); // ← this must be here
+      originalRequest.url?.includes("/user/me");
 
     if (isAuthRequest) {
       return Promise.reject(error);
@@ -64,7 +74,7 @@ api.interceptors.response.use(
 
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/auth/refresh-token",
+          `${getBaseURL()}/auth/refresh-token`,
           {},
           { withCredentials: true }
         );
