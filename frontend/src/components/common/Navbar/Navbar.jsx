@@ -27,7 +27,7 @@ const navigationItems = [
   { id: "categories", label: "Categories", path: "/categories", icon: <FiGrid /> },
 ];
 
-// Mobile bottom nav - 4 items (cleaner, no crowd)
+// Mobile bottom nav - 4 items (cleaner)
 const bottomNavigationItems = [
   { id: "home", label: "Home", path: "/", icon: <FiHome /> },
   { id: "products", label: "Shop", path: "/products", icon: <FiGrid /> },
@@ -203,7 +203,7 @@ const Navbar = () => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
-  // Shared search suggestions dropdown
+  // ========== SHARED SEARCH SUGGESTIONS ==========
   const SearchSuggestions = () => (
     <>
       {searchLoading && (
@@ -341,9 +341,7 @@ const Navbar = () => {
 
             {/* ----- Right Actions ----- */}
             <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
-              {/* === DESKTOP ACTIONS === */}
-
-              {/* Desktop: Guest auth buttons */}
+              {/* === DESKTOP: Guest auth buttons === */}
               {!user && (
                 <div className="hidden md:flex items-center gap-1.5">
                   <Button
@@ -369,7 +367,7 @@ const Navbar = () => {
                 </div>
               )}
 
-              {/* Desktop: Customer wishlist + cart */}
+              {/* === DESKTOP: Customer wishlist + cart === */}
               {user && !isAdmin && (
                 <>
                   <Link
@@ -407,7 +405,7 @@ const Navbar = () => {
                 </>
               )}
 
-              {/* Desktop: Admin Avatar */}
+              {/* === DESKTOP: Admin Avatar === */}
               {user && isAdmin && (
                 <div ref={profileRef} className="relative hidden md:block shrink-0">
                   <Button
@@ -460,7 +458,7 @@ const Navbar = () => {
                 </div>
               )}
 
-              {/* Desktop: Customer Avatar dropdown */}
+              {/* === DESKTOP: Customer Avatar dropdown === */}
               {user && !isAdmin && (
                 <div ref={profileRef} className="relative hidden md:block shrink-0">
                   <Button
@@ -562,9 +560,7 @@ const Navbar = () => {
                 </div>
               )}
 
-              {/* === MOBILE ACTIONS - CLEAN & MINIMAL === */}
-
-              {/* Mobile: Search icon (always visible) */}
+              {/* === MOBILE: Search icon === */}
               <button
                 type="button"
                 aria-label="Search"
@@ -574,7 +570,7 @@ const Navbar = () => {
                 <FiSearch className="h-5 w-5" />
               </button>
 
-              {/* Mobile: Cart icon (customer only) */}
+              {/* === MOBILE: Cart icon (customer only) === */}
               {user && !isAdmin && (
                 <Link
                   to="/cart"
@@ -594,7 +590,7 @@ const Navbar = () => {
                 </Link>
               )}
 
-              {/* Mobile: Menu button (always visible) */}
+              {/* === MOBILE: Menu button === */}
               <button
                 type="button"
                 aria-label="Open menu"
@@ -661,7 +657,6 @@ const Navbar = () => {
             </form>
           </div>
 
-          {/* Search Suggestions for mobile */}
           <div className="h-[calc(100vh-56px)] overflow-y-auto">
             {searchTerm.trim().length >= 2 ? (
               <SearchSuggestions />
@@ -682,22 +677,19 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* ========== MOBILE BOTTOM NAVIGATION (4 items, clean) ========== */}
+      {/* ========== MOBILE BOTTOM NAVIGATION ========== */}
       {!isAdmin && (
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-neutral-200 bg-white/95 backdrop-blur-md md:hidden">
           <div className="flex items-center justify-around px-2 py-1">
             {bottomNavigationItems.map((item) => {
-              const itemCount =
-                item.id === "cart" ? cartCount : null;
+              const itemCount = item.id === "cart" ? cartCount : null;
               const isItemActive = isActive(item.path);
               return (
                 <Link
                   key={item.id}
                   to={item.path}
                   className={`relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors duration-200 ${
-                    isItemActive
-                      ? "text-primary-600"
-                      : "text-neutral-500"
+                    isItemActive ? "text-primary-600" : "text-neutral-500"
                   }`}
                 >
                   <span className="relative flex h-6 w-6 items-center justify-center">
@@ -724,9 +716,9 @@ const Navbar = () => {
         />
       )}
 
-      {/* ========== MOBILE SIDEBAR ========== */}
+      {/* ========== MOBILE SIDEBAR (LEFT SIDE) ========== */}
       {isSidebarOpen && !isAdmin && (
-        <aside className="fixed inset-y-0 right-0 z-[100] flex w-[300px] max-w-[85vw] flex-col border-l border-neutral-200 bg-white shadow-2xl md:hidden animate-slide-left">
+        <aside className="fixed inset-y-0 left-0 z-[100] flex w-[300px] max-w-[85vw] flex-col border-r border-neutral-200 bg-white shadow-2xl md:hidden animate-slide-right">
           {/* Sidebar Header */}
           <div className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-200 px-4">
             <Logo size="sm" linkTo="/" />
