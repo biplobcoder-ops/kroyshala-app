@@ -7,8 +7,9 @@ const {
 
 const seedRouter = express.Router();
 
-seedRouter.get("/users", handleSeedUser);
-seedRouter.get("/categories", handleSeedCategories); // 🆕
-seedRouter.get("/products", handleSeedProducts); // 🆕
+// ✅ POST methods use koro (seed create data)
+seedRouter.post("/users", handleSeedUser);
+seedRouter.post("/categories", handleSeedCategories);
+seedRouter.post("/products", handleSeedProducts);
 
 module.exports = seedRouter;
