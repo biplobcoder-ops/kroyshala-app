@@ -27,7 +27,6 @@ const navigationItems = [
   { id: "categories", label: "Categories", path: "/categories", icon: <FiGrid /> },
 ];
 
-// Mobile bottom nav - 4 items (cleaner)
 const bottomNavigationItems = [
   { id: "home", label: "Home", path: "/", icon: <FiHome /> },
   { id: "products", label: "Shop", path: "/products", icon: <FiGrid /> },
@@ -236,10 +235,10 @@ const Navbar = () => {
                 <img
                   src={product.images[0].url}
                   alt={product.name}
-                  className="h-12 w-12 rounded-lg object-cover border border-neutral-100"
+                  className="h-12 w-12 rounded-lg object-cover border border-neutral-100 shrink-0"
                 />
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-neutral-100">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-neutral-100">
                   <FiPackage className="h-6 w-6 text-neutral-400" />
                 </div>
               )}
@@ -272,7 +271,7 @@ const Navbar = () => {
               }}
               className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-primary-50"
             >
-              <FiGrid className="h-4 w-4 text-neutral-400" />
+              <FiGrid className="h-4 w-4 text-neutral-400 shrink-0" />
               <span className="text-sm text-neutral-900">{category.name}</span>
             </button>
           ))}
@@ -565,7 +564,7 @@ const Navbar = () => {
                 type="button"
                 aria-label="Search"
                 onClick={() => setIsMobileSearchOpen(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 transition-colors hover:bg-neutral-100 md:hidden"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-neutral-700 transition-colors hover:bg-neutral-100 md:hidden"
               >
                 <FiSearch className="h-5 w-5" />
               </button>
@@ -575,7 +574,7 @@ const Navbar = () => {
                 <Link
                   to="/cart"
                   aria-label="Shopping cart"
-                  className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors md:hidden ${
+                  className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors md:hidden ${
                     isActive("/cart")
                       ? "bg-primary-50 text-primary-600"
                       : "text-neutral-700 hover:bg-neutral-100"
@@ -595,7 +594,7 @@ const Navbar = () => {
                 type="button"
                 aria-label="Open menu"
                 onClick={() => setIsSidebarOpen(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 transition-colors hover:bg-neutral-100 md:hidden"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-neutral-700 transition-colors hover:bg-neutral-100 md:hidden"
               >
                 <FiMenu className="h-5 w-5" />
               </button>
@@ -716,9 +715,9 @@ const Navbar = () => {
         />
       )}
 
-      {/* ========== MOBILE SIDEBAR (LEFT SIDE) ========== */}
+      {/* ========== MOBILE SIDEBAR (LEFT SIDE) - RESPONSIVE ========== */}
       {isSidebarOpen && !isAdmin && (
-        <aside className="fixed inset-y-0 left-0 z-[100] flex w-[300px] max-w-[85vw] flex-col border-r border-neutral-200 bg-white shadow-2xl md:hidden animate-slide-right">
+        <aside className="fixed inset-y-0 left-0 z-[100] flex w-[min(85vw,320px)] flex-col border-r border-neutral-200 bg-white shadow-2xl md:hidden animate-slide-right">
           {/* Sidebar Header */}
           <div className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-200 px-4">
             <Logo size="sm" linkTo="/" />
@@ -726,16 +725,16 @@ const Navbar = () => {
               type="button"
               aria-label="Close menu"
               onClick={() => setIsSidebarOpen(false)}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100"
             >
               <FiX className="h-5 w-5" />
             </button>
           </div>
 
           <nav className="flex-1 overflow-y-auto px-3 py-4">
-            {/* User greeting (if logged in) */}
+            {/* ========== USER GREETING (LOGGED IN) ========== */}
             {user && (
-              <div className="mb-4 rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100/50 p-4">
+              <div className="mb-4 rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100/50 p-3.5">
                 <div className="flex items-center gap-3">
                   <Avatar
                     src={user.image?.url || ""}
@@ -743,6 +742,7 @@ const Navbar = () => {
                     size="md"
                     rounded="full"
                     border
+                    className="shrink-0"
                   />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-neutral-900">
@@ -756,13 +756,13 @@ const Navbar = () => {
               </div>
             )}
 
-            {/* Guest auth buttons */}
+            {/* ========== GUEST AUTH BUTTONS (VERTICAL STACK) ========== */}
             {!user && (
-              <div className="mb-4 flex gap-2">
+              <div className="mb-4 flex flex-col gap-2">
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="md"
                   rounded="lg"
                   fullWidth
                   leftIcon={<FiLogIn />}
@@ -776,7 +776,7 @@ const Navbar = () => {
                 <Button
                   type="button"
                   variant="primary"
-                  size="sm"
+                  size="md"
                   rounded="lg"
                   fullWidth
                   leftIcon={<FiUserPlus />}
@@ -790,7 +790,7 @@ const Navbar = () => {
               </div>
             )}
 
-            {/* Menu Section */}
+            {/* ========== MENU SECTION ========== */}
             <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
               Menu
             </p>
@@ -821,7 +821,7 @@ const Navbar = () => {
                     >
                       {item.icon}
                     </span>
-                    <span className="flex-1">{item.label}</span>
+                    <span className="flex-1 truncate">{item.label}</span>
                     {itemCount > 0 && (
                       <Badge variant="primary" size="sm" rounded="full">
                         {itemCount}
@@ -832,7 +832,7 @@ const Navbar = () => {
               })}
             </div>
 
-            {/* Account Section */}
+            {/* ========== ACCOUNT SECTION (LOGGED IN) ========== */}
             {user && (
               <>
                 <p className="mb-2 mt-5 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
@@ -844,32 +844,32 @@ const Navbar = () => {
                     onClick={() => setIsSidebarOpen(false)}
                     className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
                   >
-                    <FiUser className="h-5 w-5 text-neutral-500" />
-                    <span>My Profile</span>
+                    <FiUser className="h-5 w-5 shrink-0 text-neutral-500" />
+                    <span className="truncate">My Profile</span>
                   </Link>
                   <Link
                     to="/orders"
                     onClick={() => setIsSidebarOpen(false)}
                     className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
                   >
-                    <FiPackage className="h-5 w-5 text-neutral-500" />
-                    <span>My Orders</span>
+                    <FiPackage className="h-5 w-5 shrink-0 text-neutral-500" />
+                    <span className="truncate">My Orders</span>
                   </Link>
                   <Link
                     to="/account/addresses"
                     onClick={() => setIsSidebarOpen(false)}
                     className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
                   >
-                    <FiMapPin className="h-5 w-5 text-neutral-500" />
-                    <span>My Address</span>
+                    <FiMapPin className="h-5 w-5 shrink-0 text-neutral-500" />
+                    <span className="truncate">My Address</span>
                   </Link>
                   <Link
                     to="/account/change-password"
                     onClick={() => setIsSidebarOpen(false)}
                     className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
                   >
-                    <FiLock className="h-5 w-5 text-neutral-500" />
-                    <span>Change Password</span>
+                    <FiLock className="h-5 w-5 shrink-0 text-neutral-500" />
+                    <span className="truncate">Change Password</span>
                   </Link>
                 </div>
 
@@ -878,7 +878,7 @@ const Navbar = () => {
                   onClick={handleLogout}
                   className="mt-4 flex w-full items-center gap-3 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"
                 >
-                  <FiLogOut className="h-4 w-4" />
+                  <FiLogOut className="h-4 w-4 shrink-0" />
                   <span>Logout</span>
                 </button>
               </>
