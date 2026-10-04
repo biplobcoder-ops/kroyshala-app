@@ -16,42 +16,60 @@ const Button = ({
 }) => {
   const variants = {
     primary:
-      "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800",
+      "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 shadow-sm hover:shadow-md",
 
     secondary:
-      "bg-slate-600 text-white hover:bg-slate-700",
+      "bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-950 shadow-sm hover:shadow-md",
 
     outline:
-      "border border-slate-300 bg-white text-slate-800 hover:bg-slate-100",
+      "border border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-50 hover:border-neutral-400 active:bg-neutral-100",
+
+    ghost:
+      "bg-transparent text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200",
 
     danger:
-      "bg-red-500 text-white hover:bg-red-600",
+      "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm hover:shadow-md",
+
+    success:
+      "bg-green-600 text-white hover:bg-green-700 active:bg-green-800 shadow-sm hover:shadow-md",
   };
 
   const sizes = {
+    xs: {
+      button: "px-2.5 py-1 text-xs",
+      icon: "w-3.5 h-3.5",
+      gap: "gap-1",
+    },
+
     sm: {
-      button: "px-3 py-1.5 text-sm",
+      button: "px-3.5 py-1.5 text-sm",
       icon: "w-4 h-4",
       gap: "gap-1.5",
     },
 
     md: {
-      button: "px-5 py-2 text-base",
-      icon: "w-5 h-5",
+      button: "px-5 py-2.5 text-sm",
+      icon: "w-4.5 h-4.5",
       gap: "gap-2",
     },
 
     lg: {
-      button: "px-6 py-2.5 text-lg",
-      icon: "w-6 h-6",
+      button: "px-6 py-3 text-base",
+      icon: "w-5 h-5",
+      gap: "gap-2",
+    },
+
+    xl: {
+      button: "px-8 py-4 text-base",
+      icon: "w-5 h-5",
       gap: "gap-2.5",
     },
   };
 
   const roundedStyles = {
-    sm: "rounded",
-    md: "rounded-md",
-    lg: "rounded-lg",
+    sm: "rounded-md",
+    md: "rounded-lg",
+    lg: "rounded-xl",
     full: "rounded-full",
   };
 
@@ -63,14 +81,15 @@ const Button = ({
       disabled={disabled || loading}
       className={clsx(
         "inline-flex items-center justify-center shrink-0",
-        "font-medium",
-        "transition-all duration-300",
+        "font-semibold tracking-tight",
+        "transition-all duration-200 ease-out",
         "focus:outline-none",
-        "focus:ring-2",
-        "focus:ring-blue-500",
-        "focus:ring-offset-2",
+        "focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
         "disabled:cursor-not-allowed",
-        "disabled:opacity-60",
+        "disabled:opacity-50",
+        "disabled:hover:shadow-none",
+        "disabled:transform-none",
+        "active:scale-[0.98]",
 
         variants[variant] || variants.primary,
 
@@ -88,30 +107,25 @@ const Button = ({
       {loading ? (
         <>
           <svg
-            className={clsx(
-              "animate-spin",
-              currentSize.icon
-            )}
+            className={clsx("animate-spin", currentSize.icon)}
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
           >
             <circle
-              className="opacity-20"
+              className="opacity-25"
               cx="12"
               cy="12"
               r="10"
               stroke="currentColor"
               strokeWidth="4"
             />
-
             <path
-              className="opacity-100"
+              className="opacity-90"
               fill="currentColor"
               d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
             />
           </svg>
-
           <span>Loading...</span>
         </>
       ) : (
@@ -119,7 +133,7 @@ const Button = ({
           {leftIcon && (
             <span
               className={clsx(
-                "flex items-center justify-center",
+                "flex items-center justify-center shrink-0",
                 currentSize.icon
               )}
             >
@@ -127,12 +141,12 @@ const Button = ({
             </span>
           )}
 
-          <span>{children}</span>
+          <span className="truncate">{children}</span>
 
           {rightIcon && (
             <span
               className={clsx(
-                "flex items-center justify-center",
+                "flex items-center justify-center shrink-0",
                 currentSize.icon
               )}
             >
