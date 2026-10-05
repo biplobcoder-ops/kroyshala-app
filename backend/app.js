@@ -18,36 +18,55 @@ const wishlistRouter = require("./routes/wishlist.route");
 const dashboardRouter = require("./routes/dashboard.route");
 const searchRouter = require("./routes/search.route");
 
-// 🔥 CORS - শুধুমাত্র নির্দিষ্ট অরিজিন অ্যালাউড (অন্য সব ব্লক)
+// ==========================================
+// CORS - Allowed Origins
+// ==========================================
 const allowedOrigins = [
-  "http://localhost:5173",                       // লোকাল ডেভেলপমেন্ট (তোমার ফ্রন্টএন্ড)
-  "https://kroyshala-app.vercel.app",            // প্রোডাকশন URL (তোমার Vercel অ্যাপ)
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://kroyshala-app.vercel.app",
+  "https://kroyshala-frontend.vercel.app",          // ✅ Main
+  "https://kroyshala-frontend-mxvqhn2qq-biplob-coder-team.vercel.app", // ✅ Deployment
+  process.env.CLIENT_URL,                            // ✅ Env var
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // যদি origin না থাকে (একই অরিজিন) অথবা allowedOrigins-এর মধ্যে থাকে
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS not allowed from origin: ${origin}`));
+      // No origin (Postman, mobile) — allow
+      if (!origin) return callback(null, true);
+
+      // Allowed list e ache
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
       }
+
+      // All *.vercel.app (preview deployments)
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      // Block
+      return callback(new Error(`CORS not allowed from origin: ${origin}`));
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
 
-// বাকি middleware
+// ==========================================
+// Middleware
+// ==========================================
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(helmet());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
+// ==========================================
 // Routes
+// ==========================================
 app.get("/", (req, res) => {
   res.status(200).send("Home page - Kroyshala API");
 });
@@ -64,15 +83,23 @@ app.use("/api/dashboard", dashboardRouter);
 app.use("/api/seed", seedRouter);
 app.use("/api/search", searchRouter);
 
+// ==========================================
 // 404 Handler
+// ==========================================
 app.use((req, res, next) => {
   next(createError(404, "Route not found"));
 });
 
+// ==========================================
 // Global Error Handler
+// ==========================================
 app.use((err, req, res, next) => {
   const statusCode = err.status || 500;
   const message = err.message || "Internal Server Error";
+
+  console.error(`❌ [Error] ${statusCode}: ${message}`);
+  console.error("Stack:", err.stack);
+
   return errorResponse(res, {
     statusCode: statusCode,
     message: message,
