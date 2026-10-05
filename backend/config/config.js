@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const dev = {
   app: {
-    port: process.env.PORT || 5000,
+    port: process.env.PORT || 5000,                              // ✅ Default
     nodeEnv: process.env.NODE_ENV || "development",
     clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
   },
