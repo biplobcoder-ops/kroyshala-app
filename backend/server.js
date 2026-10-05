@@ -4,20 +4,24 @@ const connectDB = require("./config/db");
 
 const PORT = config.app.port || 4000;
 
-// Connect database
+// ==========================================
+// Connect Database (with proper error handling)
+// ==========================================
 connectDB()
-  .then(() => console.log("✅ Database connected successfully"))
-  .catch((error) => console.error("❌ Database failed:", error.message));
+  .then(() => console.log("✅ Server ready — DB connected"))
+  .catch((error) => console.error("❌ Initial DB connection failed:", error.message));
 
-// Local: start server with listen
-// Vercel: skip listen, export app
+// ==========================================
+// Start Server
+// ==========================================
 if (process.env.NODE_ENV !== "production") {
+  // Local development
   app.listen(PORT, () => {
     console.log(`🚀 Server is running at http://localhost:${PORT}`);
   });
 } else {
-  console.log(`🚀 Server ready for Vercel serverless`);
+  // Vercel serverless
+  console.log("🚀 Server ready for Vercel serverless");
 }
 
-// ⚠️ CRITICAL: Export for Vercel
 module.exports = app;
