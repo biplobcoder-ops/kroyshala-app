@@ -1,186 +1,284 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { FiChevronDown, FiChevronUp, FiX } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { FiChevronDown, FiChevronUp, FiCheck, FiX } from "react-icons/fi";
 
-import Button from "../../../components/ui/Button/Button";
-import Input from "../../../components/ui/Input/Input";
+const ProductFilter = ({ categories = [], activeFilters = {}, onFilterChange }) => {
+  const { category = "", brand = "", minPrice = "", maxPrice = "" } = activeFilters;
 
-import { fetchProductFilters } from "../store/productSlice";
+  const [openSections, setOpenSections] = useState({
+    category: true,
+    price: true,
+    brand: true,
+  });
 
-// ==========================================
-// Product Filter Component
-// ==========================================
+  const [priceRange, setPriceRange] = useState({
+    min: minPrice || "",
+    max: maxPrice || "",
+  });
 
-const ProductFilter = ({ filters, onFilterChange, onClearFilters }) => {
-  const dispatch = useDispatch();
-  const filterData = useSelector((state) => state.products.filterData);
+  const [brandSearch, setBrandSearch] = useState("");
 
-  const [openSection, setOpenSection] = useState("categories");
-  const [selectedBrands, setSelectedBrands] = useState([]);
-  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  // Common brands
+  const brandsList = [
+    "Apple",
+    "Samsung",
+    "Nike",
+    "Pran",
+    "Rupchanda",
+    "Aarong",
+    "The Ordinary",
+    "Dabur",
+    "Shine",
+    "Essenza",
+    "Yellow",
+  ];
 
-  // Fetch filter data
+  const selectedBrands = brand ? brand.split(",") : [];
+
+  const filteredBrands = brandsList.filter((b) =>
+    b.toLowerCase().includes(brandSearch.toLowerCase())
+  );
+
   useEffect(() => {
-    dispatch(fetchProductFilters());
-  }, [dispatch]);
+    setPriceRange({ min: minPrice, max: maxPrice });
+  }, [minPrice, maxPrice]);
 
-  // Toggle section
-  const toggleSection = (section) => {
-    setOpenSection(openSection === section ? "" : section);
+  const toggleSection = (key) => {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Brand toggle
-  const handleBrandToggle = (brand) => {
-    const newBrands = selectedBrands.includes(brand)
-      ? selectedBrands.filter((b) => b !== brand)
-      : [...selectedBrands, brand];
+  const updateParams = (updates) => {
+    const params = new URLSearchParams();
 
-    setSelectedBrands(newBrands);
-    onFilterChange({ brand: newBrands.join(",") });
+    // Keep existing search + sort
+    const current = new URLSearchParams(window.location.search);
+    const search = current.get("search");
+    const sort = current.get("sort");
+
+    if (search) params.set("search", search);
+    if (sort) params.set("sort", sort);
+
+    const merged = { category, brand, minPrice, maxPrice, ...updates };
+    if (merged.category) params.set("category", merged.category);
+    if (merged.brand) params.set("brand", merged.brand);
+    if (merged.minPrice) params.set("minPrice", merged.minPrice);
+    if (merged.maxPrice) params.set("maxPrice", merged.maxPrice);
+
+    params.set("page", "1");
+    onFilterChange?.(params);
   };
 
-  // Price change
-  const handlePriceChange = (type, value) => {
-    const newPriceRange = { ...priceRange, [type]: value };
-    setPriceRange(newPriceRange);
-    onFilterChange({ minPrice: newPriceRange.min, maxPrice: newPriceRange.max });
+  const handleCategorySelect = (slug) => {
+    updateParams({ category: category === slug ? "" : slug });
   };
+
+  const handleBrandToggle = (brandName) => {
+    const newBrands = selectedBrands.includes(brandName)
+      ? selectedBrands.filter((b) => b !== brandName)
+      : [...selectedBrands, brandName];
+
+    updateParams({ brand: newBrands.join(",") });
+  };
+
+  const handlePriceApply = () => {
+    updateParams({ minPrice: priceRange.min, maxPrice: priceRange.max });
+  };
+
+  const clearAll = () => {
+    onFilterChange?.(new URLSearchParams({ page: "1" }));
+  };
+
+  const hasActiveFilters = category || brand || minPrice || maxPrice;
 
   return (
-    <div className="space-y-2">
-      {/* Categories Section */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-semibold text-neutral-900">Filters</h3>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={clearAll}
+            className="text-xs font-semibold text-primary-600 hover:text-primary-700 hover:underline"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+
+      {/* ---------- CATEGORY ---------- */}
+      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
         <button
           type="button"
-          onClick={() => toggleSection("categories")}
-          className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+          onClick={() => toggleSection("category")}
+          className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-neutral-50"
         >
-          <span>Categories</span>
-          {openSection === "categories" ? <FiChevronUp className="h-4 w-4" /> : <FiChevronDown className="h-4 w-4" />}
+          <span className="text-sm font-semibold text-neutral-900">
+            Categories
+          </span>
+          {openSections.category ? (
+            <FiChevronUp className="h-4 w-4 text-neutral-500" />
+          ) : (
+            <FiChevronDown className="h-4 w-4 text-neutral-500" />
+          )}
         </button>
 
-        {openSection === "categories" && (
-          <div className="max-h-60 space-y-1 overflow-y-auto border-t border-slate-100 p-3">
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50">
-              <input
-                type="radio"
-                name="category"
-                checked={!filters.category}
-                onChange={() => onFilterChange({ category: "" })}
-                className="h-4 w-4 accent-blue-600"
-              />
-              <span className="text-sm text-slate-700">All Categories</span>
-            </label>
-
-            {filterData?.categories?.map((category) => (
-              <label key={category._id} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50">
-                <input
-                  type="radio"
-                  name="category"
-                  checked={filters.category === category.slug}
-                  onChange={() => onFilterChange({ category: category.slug })}
-                  className="h-4 w-4 accent-blue-600"
-                />
-                <span className="text-sm text-slate-700">{category.name}</span>
-              </label>
-            ))}
+        {openSections.category && (
+          <div className="border-t border-neutral-100 p-3">
+            <div className="space-y-0.5">
+              {categories.map((cat) => {
+                const isActive = category === cat.slug;
+                return (
+                  <button
+                    key={cat._id}
+                    type="button"
+                    onClick={() => handleCategorySelect(cat.slug)}
+                    className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                      isActive
+                        ? "bg-primary-50 font-semibold text-primary-700"
+                        : "text-neutral-700 hover:bg-neutral-50"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                        isActive
+                          ? "border-primary-600 bg-primary-600"
+                          : "border-neutral-300"
+                      }`}
+                    >
+                      {isActive && <FiCheck className="h-3 w-3 text-white" />}
+                    </span>
+                    <span className="flex-1 truncate">{cat.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Price Range Section */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      {/* ---------- PRICE RANGE ---------- */}
+      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
         <button
           type="button"
           onClick={() => toggleSection("price")}
-          className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+          className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-neutral-50"
         >
-          <span>Price Range</span>
-          {openSection === "price" ? <FiChevronUp className="h-4 w-4" /> : <FiChevronDown className="h-4 w-4" />}
+          <span className="text-sm font-semibold text-neutral-900">
+            Price Range
+          </span>
+          {openSections.price ? (
+            <FiChevronUp className="h-4 w-4 text-neutral-500" />
+          ) : (
+            <FiChevronDown className="h-4 w-4 text-neutral-500" />
+          )}
         </button>
 
-        {openSection === "price" && (
-          <div className="border-t border-slate-100 p-4">
+        {openSections.price && (
+          <div className="border-t border-neutral-100 p-4">
             <div className="flex items-center gap-2">
-              <Input type="number" placeholder="Min" value={priceRange.min} onChange={(e) => handlePriceChange("min", e.target.value)} className="!h-10" />
-              <span className="text-slate-400">-</span>
-              <Input type="number" placeholder="Max" value={priceRange.max} onChange={(e) => handlePriceChange("max", e.target.value)} className="!h-10" />
-            </div>
-
-            <div className="mt-3 space-y-1">
-              {[
-                { label: "Under ৳500", min: "", max: "500" },
-                { label: "৳500 - ৳1000", min: "500", max: "1000" },
-                { label: "৳1000 - ৳5000", min: "1000", max: "5000" },
-                { label: "Above ৳5000", min: "5000", max: "" },
-              ].map((range) => (
-                <label key={range.label} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 transition hover:bg-slate-50">
-                  <input
-                    type="radio"
-                    name="price-range"
-                    checked={priceRange.min === range.min && priceRange.max === range.max}
-                    onChange={() => {
-                      setPriceRange({ min: range.min, max: range.max });
-                      onFilterChange({ minPrice: range.min, maxPrice: range.max });
-                    }}
-                    className="h-4 w-4 accent-blue-600"
-                  />
-                  <span className="text-xs text-slate-600">{range.label}</span>
+              <div className="flex-1">
+                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                  Min
                 </label>
-              ))}
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={priceRange.min}
+                  onChange={(e) =>
+                    setPriceRange((p) => ({ ...p, min: e.target.value }))
+                  }
+                  className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm outline-none transition-colors focus:border-primary-500 focus:bg-white"
+                />
+              </div>
+              <span className="mt-5 text-neutral-400">—</span>
+              <div className="flex-1">
+                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                  Max
+                </label>
+                <input
+                  type="number"
+                  placeholder="100000"
+                  value={priceRange.max}
+                  onChange={(e) =>
+                    setPriceRange((p) => ({ ...p, max: e.target.value }))
+                  }
+                  className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm outline-none transition-colors focus:border-primary-500 focus:bg-white"
+                />
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={handlePriceApply}
+              className="mt-3 w-full rounded-lg bg-primary-600 py-2 text-xs font-semibold text-white transition-all hover:bg-primary-700"
+            >
+              Apply Price
+            </button>
           </div>
         )}
       </div>
 
-      {/* Brands Section */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      {/* ---------- BRANDS ---------- */}
+      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
         <button
           type="button"
-          onClick={() => toggleSection("brands")}
-          className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+          onClick={() => toggleSection("brand")}
+          className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-neutral-50"
         >
-          <span>Brands</span>
-          {selectedBrands.length > 0 && (
-            <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs text-white">{selectedBrands.length}</span>
+          <span className="text-sm font-semibold text-neutral-900">Brands</span>
+          {openSections.brand ? (
+            <FiChevronUp className="h-4 w-4 text-neutral-500" />
+          ) : (
+            <FiChevronDown className="h-4 w-4 text-neutral-500" />
           )}
-          {openSection === "brands" ? <FiChevronUp className="h-4 w-4" /> : <FiChevronDown className="h-4 w-4" />}
         </button>
 
-        {openSection === "brands" && (
-          <div className="max-h-60 space-y-1 overflow-y-auto border-t border-slate-100 p-3">
-            {filterData?.brands?.map((brand) => (
-              <label key={brand} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50">
-                <input
-                  type="checkbox"
-                  checked={selectedBrands.includes(brand)}
-                  onChange={() => handleBrandToggle(brand)}
-                  className="h-4 w-4 rounded accent-blue-600"
-                />
-                <span className="text-sm text-slate-700">{brand}</span>
-              </label>
-            ))}
+        {openSections.brand && (
+          <div className="border-t border-neutral-100 p-4">
+            {/* Brand Search */}
+            <input
+              type="text"
+              placeholder="Search brands..."
+              value={brandSearch}
+              onChange={(e) => setBrandSearch(e.target.value)}
+              className="mb-3 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm outline-none transition-colors focus:border-primary-500 focus:bg-white"
+            />
+
+            <div className="max-h-56 space-y-0.5 overflow-y-auto pr-1">
+              {filteredBrands.map((brandName) => {
+                const isActive = selectedBrands.includes(brandName);
+                return (
+                  <button
+                    key={brandName}
+                    type="button"
+                    onClick={() => handleBrandToggle(brandName)}
+                    className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                      isActive
+                        ? "bg-primary-50 font-semibold text-primary-700"
+                        : "text-neutral-700 hover:bg-neutral-50"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                        isActive
+                          ? "border-primary-600 bg-primary-600"
+                          : "border-neutral-300"
+                      }`}
+                    >
+                      {isActive && <FiCheck className="h-3 w-3 text-white" />}
+                    </span>
+                    <span className="flex-1 truncate">{brandName}</span>
+                  </button>
+                );
+              })}
+              {filteredBrands.length === 0 && (
+                <p className="py-3 text-center text-xs text-neutral-500">
+                  No brands found
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>
-
-      {/* Clear Filters */}
-      {(filters.category || filters.minPrice || filters.maxPrice || selectedBrands.length > 0 || filters.search) && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          fullWidth
-          leftIcon={<FiX />}
-          onClick={() => {
-            setSelectedBrands([]);
-            setPriceRange({ min: "", max: "" });
-            onClearFilters();
-          }}
-        >
-          Clear All Filters
-        </Button>
-      )}
     </div>
   );
 };
