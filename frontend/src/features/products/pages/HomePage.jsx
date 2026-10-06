@@ -34,7 +34,6 @@ const HomePage = () => {
     console.log("Add to wishlist:", product);
   };
 
-  // Featured products filter
   const featuredProducts = products?.filter((p) => p.isFeatured) || [];
   const displayProducts =
     featuredProducts.length > 0 ? featuredProducts : products;
@@ -93,14 +92,9 @@ const HomePage = () => {
       {categories?.length > 0 && (
         <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-6 flex items-end justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary-600">
-                Browse
-              </p>
-              <h2 className="mt-1 text-2xl font-bold text-neutral-900 sm:text-3xl font-display">
-                Shop by Category
-              </h2>
-            </div>
+            <h2 className="text-2xl font-bold text-neutral-900 sm:text-3xl font-display">
+              Shop by Category
+            </h2>
             <Link to="/categories">
               <Button variant="ghost" size="sm" rightIcon={<FiArrowRight />}>
                 All Categories
@@ -139,10 +133,7 @@ const HomePage = () => {
       <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-end justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary-600">
-              Hand-picked
-            </p>
-            <h2 className="mt-1 text-2xl font-bold text-neutral-900 sm:text-3xl font-display">
+            <h2 className="text-2xl font-bold text-neutral-900 sm:text-3xl font-display">
               Featured Products
             </h2>
             <p className="mt-1 text-sm text-neutral-500">
@@ -199,10 +190,7 @@ const HomePage = () => {
       {/* ========== WHY CHOOSE US ========== */}
       <section className="mx-auto max-w-[1280px] px-4 py-8 pb-16 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary-600">
-            Why Kroyshala
-          </p>
-          <h2 className="mt-1 text-2xl font-bold text-neutral-900 sm:text-3xl font-display">
+          <h2 className="text-2xl font-bold text-neutral-900 sm:text-3xl font-display">
             Trusted by thousands of shoppers
           </h2>
         </div>
