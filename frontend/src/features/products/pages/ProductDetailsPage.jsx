@@ -13,33 +13,53 @@ import {
   FiChevronRight,
   FiPackage,
   FiCheck,
+  FiLoader,
 } from "react-icons/fi";
 import Button from "../../../components/ui/Button/Button";
-import Badge from "../../../components/ui/Badge/Badge";
-import { fetchSingleProduct } from "../store/productSlice";
+import { fetchProducts } from "../store/productSlice";
 
 const ProductDetailsPage = () => {
   const { slug } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { product, loading } = useSelector((state) => state.products);
+  const { products, loading } = useSelector((state) => state.products);
+  const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState("description");
 
+  // Fetch all products (or if only one specific fetch is needed)
   useEffect(() => {
-    if (slug) dispatch(fetchSingleProduct(slug));
-  }, [dispatch, slug]);
+    // If products not loaded, fetch them
+    if (!products || products.length === 0) {
+      dispatch(fetchProducts({ page: 1, limit: 100 }));
+    }
+  }, [dispatch, products?.length]);
 
+  // Find the specific product from products list by slug
+  useEffect(() => {
+    if (products && products.length > 0) {
+      const found = products.find((p) => p.slug === slug);
+      if (found) {
+        setProduct(found);
+      } else {
+        // If not found in first page, try to find via search
+        setProduct(null);
+      }
+    }
+  }, [products, slug]);
+
+  // Reset on slug change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setSelectedImage(0);
     setQuantity(1);
+    setActiveTab("description");
   }, [slug]);
 
-  // Loading
-  if (loading || !product) {
+  // ---------- LOADING STATE ----------
+  if (loading && !product) {
     return (
       <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2">
@@ -56,8 +76,32 @@ const ProductDetailsPage = () => {
     );
   }
 
+  // ---------- NOT FOUND STATE ----------
+  if (!loading && !product) {
+    return (
+      <div className="mx-auto flex min-h-[60vh] max-w-[1280px] flex-col items-center justify-center px-4 py-16 text-center sm:px-6 lg:px-8">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100 text-neutral-400">
+          <FiPackage className="h-10 w-10" />
+        </div>
+        <h1 className="mt-6 text-2xl font-bold text-neutral-900 font-display">
+          Product Not Found
+        </h1>
+        <p className="mt-2 max-w-md text-sm text-neutral-500">
+          The product you're looking for doesn't exist or has been removed.
+        </p>
+        <Link to="/products" className="mt-6">
+          <Button variant="primary" leftIcon={<FiPackage />}>
+            Browse All Products
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  // ---------- COMPUTE VALUES ----------
   const price =
     product.discountPrice > 0 ? product.discountPrice : product.price;
+
   const discountPercent =
     product.discountPrice > 0
       ? Math.round(
@@ -66,6 +110,8 @@ const ProductDetailsPage = () => {
       : 0;
 
   const isOutOfStock = product.stock === 0;
+  const images = product.images || [];
+  const currentImage = images[selectedImage]?.url || images[0]?.url;
 
   const handleQuantityChange = (delta) => {
     setQuantity((q) => Math.max(1, Math.min(product.stock || 1, q + delta)));
@@ -85,13 +131,13 @@ const ProductDetailsPage = () => {
       <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
         {/* ========== BREADCRUMB ========== */}
         <nav className="mb-6 flex items-center gap-1.5 text-xs text-neutral-500">
-          <Link to="/" className="hover:text-primary-600 transition-colors">
+          <Link to="/" className="transition-colors hover:text-primary-600">
             Home
           </Link>
           <FiChevronRight className="h-3 w-3" />
           <Link
             to="/products"
-            className="hover:text-primary-600 transition-colors"
+            className="transition-colors hover:text-primary-600"
           >
             Products
           </Link>
@@ -100,7 +146,7 @@ const ProductDetailsPage = () => {
               <FiChevronRight className="h-3 w-3" />
               <Link
                 to={`/categories/${product.category.slug}`}
-                className="hover:text-primary-600 transition-colors"
+                className="transition-colors hover:text-primary-600"
               >
                 {product.category.name}
               </Link>
@@ -117,15 +163,18 @@ const ProductDetailsPage = () => {
           {/* ---------- IMAGE GALLERY ---------- */}
           <div>
             <div className="relative aspect-square overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-              <img
-                src={
-                  product.images?.[selectedImage]?.url ||
-                  product.images?.[0]?.url ||
-                  "/placeholder.png"
-                }
-                alt={product.name}
-                className="h-full w-full object-cover"
-              />
+              {currentImage ? (
+                <img
+                  src={currentImage}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-neutral-100">
+                  <FiPackage className="h-16 w-16 text-neutral-300" />
+                </div>
+              )}
+
               {discountPercent > 0 && (
                 <span className="absolute left-4 top-4 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-md">
                   -{discountPercent}% Off
@@ -134,9 +183,9 @@ const ProductDetailsPage = () => {
             </div>
 
             {/* Thumbnails */}
-            {product.images?.length > 1 && (
+            {images.length > 1 && (
               <div className="mt-4 grid grid-cols-5 gap-2">
-                {product.images.map((img, i) => (
+                {images.map((img, i) => (
                   <button
                     key={i}
                     type="button"
@@ -165,7 +214,7 @@ const ProductDetailsPage = () => {
               {product.category && (
                 <Link
                   to={`/categories/${product.category.slug}`}
-                  className="font-semibold uppercase tracking-wider text-primary-600 hover:text-primary-700"
+                  className="font-semibold uppercase tracking-wider text-primary-600 transition-colors hover:text-primary-700"
                 >
                   {product.category.name}
                 </Link>
@@ -207,12 +256,15 @@ const ProductDetailsPage = () => {
             {/* SKU */}
             {product.sku && (
               <p className="mt-3 text-xs text-neutral-500">
-                SKU: <span className="font-medium text-neutral-700">{product.sku}</span>
+                SKU:{" "}
+                <span className="font-medium text-neutral-700">
+                  {product.sku}
+                </span>
               </p>
             )}
 
             {/* Price */}
-            <div className="mt-5 flex items-baseline gap-3">
+            <div className="mt-5 flex flex-wrap items-baseline gap-3">
               <span className="text-3xl font-bold text-neutral-900">
                 ৳{price}
               </span>
@@ -332,17 +384,20 @@ const ProductDetailsPage = () => {
 
         {/* ========== TABS SECTION ========== */}
         <div className="mt-12 rounded-2xl border border-neutral-200 bg-white">
-          <div className="flex border-b border-neutral-200">
+          <div className="flex overflow-x-auto border-b border-neutral-200 scrollbar-hide">
             {[
               { key: "description", label: "Description" },
               { key: "specifications", label: "Specifications" },
-              { key: "reviews", label: `Reviews (${product.numReviews || 0})` },
+              {
+                key: "reviews",
+                label: `Reviews (${product.numReviews || 0})`,
+              },
             ].map((tab) => (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative px-6 py-4 text-sm font-semibold transition-colors ${
+                className={`relative shrink-0 px-6 py-4 text-sm font-semibold transition-colors ${
                   activeTab === tab.key
                     ? "text-primary-600"
                     : "text-neutral-500 hover:text-neutral-900"
@@ -359,35 +414,41 @@ const ProductDetailsPage = () => {
           <div className="p-6">
             {/* Description Tab */}
             {activeTab === "description" && (
-              <div className="prose prose-sm max-w-none text-neutral-700">
-                <p className="leading-relaxed">{product.description}</p>
+              <div className="text-sm leading-relaxed text-neutral-700">
+                <p>{product.description}</p>
               </div>
             )}
 
             {/* Specifications Tab */}
             {activeTab === "specifications" && (
               <div className="grid gap-3 sm:grid-cols-2">
-                {Object.entries(product.specifications || {}).map(([key, value]) =>
-                  value ? (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between rounded-lg border border-neutral-100 bg-neutral-50 px-4 py-3"
-                    >
-                      <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                        {key}
-                      </span>
-                      <span className="text-sm font-medium text-neutral-900">
-                        {value}
-                      </span>
-                    </div>
-                  ) : null
+                {Object.entries(product.specifications || {}).map(
+                  ([key, value]) =>
+                    value ? (
+                      <div
+                        key={key}
+                        className="flex items-center justify-between rounded-lg border border-neutral-100 bg-neutral-50 px-4 py-3"
+                      >
+                        <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                          {key}
+                        </span>
+                        <span className="text-sm font-medium text-neutral-900">
+                          {value}
+                        </span>
+                      </div>
+                    ) : null
+                )}
+                {Object.keys(product.specifications || {}).length === 0 && (
+                  <p className="text-sm text-neutral-500">
+                    No specifications available.
+                  </p>
                 )}
               </div>
             )}
 
             {/* Reviews Tab */}
             {activeTab === "reviews" && (
-              <div className="text-center py-8">
+              <div className="py-8 text-center">
                 <FiPackage className="mx-auto h-10 w-10 text-neutral-300" />
                 <p className="mt-3 text-sm text-neutral-500">
                   {product.numReviews > 0
